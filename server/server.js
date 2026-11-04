@@ -14,7 +14,6 @@ const {
 const port = Number(process.env.PORT || process.env.UNO_PORT || 3001);
 const supabaseUrl = (process.env.SUPABASE_URL || '').replace(/\/+$/, '');
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || '';
-const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 const allowedOrigins = (process.env.UNO_ALLOWED_ORIGINS || '').split(',').map((item) => item.trim()).filter(Boolean);
 const rooms = new Map();
 const connections = new WeakMap();
@@ -40,8 +39,8 @@ function normalizeName(name) {
 }
 
 async function getAccountName(accessToken) {
-  if (!supabaseUrl || !supabaseAnonKey || !supabaseServiceRoleKey) {
-    throw new Error('Signed-in play is not configured on this UNO server.');
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error('Openboard account play is not configured on this UNO server.');
   }
   const authResponse = await fetch(`${supabaseUrl}/auth/v1/user`, {
     headers: { apikey: supabaseAnonKey, Authorization: `Bearer ${accessToken}` },
@@ -54,8 +53,8 @@ async function getAccountName(accessToken) {
   profileUrl.searchParams.set('limit', '1');
   const profileResponse = await fetch(profileUrl, {
     headers: {
-      apikey: supabaseServiceRoleKey,
-      Authorization: `Bearer ${supabaseServiceRoleKey}`,
+      apikey: supabaseAnonKey,
+      Authorization: `Bearer ${accessToken}`,
     },
   });
   if (!profileResponse.ok) throw new Error('Could not load your Openboard player profile.');
@@ -374,7 +373,7 @@ const server = http.createServer((request, response) => {
     response.end(JSON.stringify({
       supabaseUrl,
       supabaseAnonKey,
-      signedInAvailable: Boolean(supabaseUrl && supabaseAnonKey && supabaseServiceRoleKey),
+      signedInAvailable: Boolean(supabaseUrl && supabaseAnonKey),
     }));
     return;
   }

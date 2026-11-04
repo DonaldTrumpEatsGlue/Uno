@@ -32,13 +32,18 @@
           <input id="guest-name" maxlength="20" autocomplete="nickname" placeholder="Choose a name">
         </div>
         <form id="account-form" hidden>
+          <div id="account-username-field" hidden>
+            <label for="account-username">Username</label>
+            <input id="account-username" type="text" autocomplete="username" minlength="3" maxlength="20" pattern="[A-Za-z0-9_]{3,20}" placeholder="3–20 letters, numbers, or underscores">
+          </div>
           <label for="account-email">Openboard email</label>
           <input id="account-email" type="email" autocomplete="username" maxlength="254" placeholder="you@example.com">
           <label for="account-password">Password</label>
-          <input id="account-password" type="password" autocomplete="current-password" maxlength="72">
+          <input id="account-password" type="password" autocomplete="current-password" minlength="8" maxlength="72">
           <button class="quiet-button" type="submit">Sign in</button>
           <p class="help-text">Use your existing Openboard account. Guest play does not require sign-in.</p>
         </form>
+        <button class="quiet-button" id="account-mode-toggle" type="button" hidden>Need an account? Create one</button>
         <button class="primary-button connect-button" id="connect-button" type="button">Connect to online tables</button>
         <p class="feedback" id="identity-feedback" aria-live="polite"></p>
         <p class="account-name" id="signed-in-name" hidden></p>
@@ -151,8 +156,8 @@
     </form>
   </dialog>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="uno-config.js?v=2"></script>
+  <script src="uno-config.js?v=3"></script>
   <script src="addCSSToCards.js"></script>
-  <script src="online.js?v=2"></script>
+  <script src="online.js?v=3"></script>
 </body>
 </html>

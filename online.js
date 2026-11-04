@@ -10,6 +10,7 @@
   let socket = null;
   let connected = false;
   let identityMode = 'guest';
+  let accountMode = 'signin';
   let playerId = null;
   let playerName = '';
   let currentRoom = null;
@@ -117,32 +118,78 @@
     event.preventDefault();
     const settings = await getServerConfig();
     if (!settings.supabaseUrl || !settings.supabaseAnonKey) {
-      setFeedback('Account sign-in is not configured on the online server. You can still play as a guest.');
+      setFeedback('Openboard accounts are not configured on the online server. You can still play as a guest.');
       return;
     }
     const email = elements['account-email'].value.trim();
     const password = elements['account-password'].value;
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || password.length < 8 || password.length > 72) {
-      setFeedback('Enter your Openboard email and password.');
+    const username = elements['account-username'].value.trim();
+    if (accountMode === 'signup'
+      ? (!/^[A-Za-z0-9_]{3,20}$/.test(username)
+        || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+        || password.length < 8
+        || password.length > 72)
+      : (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+        || password.length < 8
+        || password.length > 72)) {
+      setFeedback(accountMode === 'signup'
+        ? 'Enter a valid username, email address, and password (8–72 characters).'
+        : 'Enter your Openboard email and password.');
       return;
     }
     const submit = elements['account-form'].querySelector('button[type="submit"]');
     submit.disabled = true;
-    setFeedback('Signing in…');
+    setFeedback(accountMode === 'signup' ? 'Creating your account…' : 'Signing in…');
     try {
-      const response = await fetch(`${settings.supabaseUrl.replace(/\/+$/, '')}/auth/v1/token?grant_type=password`, {
-        method: 'POST',
-        headers: { apikey: settings.supabaseAnonKey, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
+      let response;
+      if (accountMode === 'signup') {
+        const profileUrl = new URL(`${settings.supabaseUrl.replace(/\/+$/, '')}/rest/v1/profiles`);
+        profileUrl.searchParams.set('username_key', `eq.${username.toLowerCase()}`);
+        profileUrl.searchParams.set('select', 'id');
+        const profileResponse = await fetch(profileUrl, { headers: { apikey: settings.supabaseAnonKey } });
+        if (!profileResponse.ok) throw new Error('Could not check username availability. Try again.');
+        const profiles = await profileResponse.json();
+        if (!Array.isArray(profiles) || profiles.length) {
+          throw new Error('That username is already taken. Choose a different one.');
+        }
+        const signupUrl = new URL(`${settings.supabaseUrl.replace(/\/+$/, '')}/auth/v1/signup`);
+        signupUrl.searchParams.set('redirect_to', 'https://donaldtrumpeatsglue.github.io/OpenBoard-Chess/');
+        response = await fetch(signupUrl, {
+          method: 'POST',
+          headers: { apikey: settings.supabaseAnonKey, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password, data: { username } }),
+        });
+      } else {
+        response = await fetch(`${settings.supabaseUrl.replace(/\/+$/, '')}/auth/v1/token?grant_type=password`, {
+          method: 'POST',
+          headers: { apikey: settings.supabaseAnonKey, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
+      }
       const result = await response.json();
-      if (!response.ok) throw new Error(result.msg || result.message || 'Sign-in failed. Check your email and password.');
+      if (!response.ok) {
+        const detail = result.msg || result.message || result.error_description || result.error;
+        if (typeof detail === 'string' && /username_taken|duplicate key/i.test(detail)) {
+          throw new Error('That username is already taken. Choose a different one.');
+        }
+        throw new Error(detail || (accountMode === 'signup' ? 'Account creation failed.' : 'Sign-in failed. Check your email and password.'));
+      }
+      if (accountMode === 'signup' && !result.access_token) {
+        elements['account-password'].value = '';
+        setAccountMode('signin');
+        setFeedback(`Confirmation email sent to ${email}. Confirm your account, then sign in here.`);
+        return;
+      }
+      if (!result.access_token) throw new Error('The account service did not return a sign-in session.');
       authSession = result;
       localStorage.setItem(storedSessionKey, JSON.stringify(result));
       elements['account-password'].value = '';
       elements['account-form'].hidden = true;
+      elements['account-mode-toggle'].hidden = true;
       elements['signed-in-name'].hidden = false;
-      elements['signed-in-name'].textContent = 'Signed in. Connect to enter a room.';
+      elements['signed-in-name'].textContent = accountMode === 'signup'
+        ? `Account created as @${username}. Connect to enter a room.`
+        : 'Signed in. Connect to enter a room.';
       elements['connect-button'].textContent = 'Connect with Openboard account';
       setFeedback('');
     } catch (error) {
@@ -150,6 +197,22 @@
     } finally {
       submit.disabled = false;
     }
+  }
+
+  function setAccountMode(mode) {
+    accountMode = mode;
+    const signingUp = mode === 'signup';
+    elements['account-username-field'].hidden = !signingUp;
+    elements['account-username'].required = signingUp;
+    elements['account-email'].autocomplete = signingUp ? 'email' : 'username';
+    elements['account-password'].autocomplete = signingUp ? 'new-password' : 'current-password';
+    elements['account-form'].querySelector('button[type="submit"]').textContent = signingUp ? 'Create account' : 'Sign in';
+    elements['account-form'].querySelector('.help-text').textContent = signingUp
+      ? 'A confirmation email may be required before you can sign in.'
+      : 'Use your existing Openboard account. Guest play does not require sign-in.';
+    elements['account-mode-toggle'].textContent = signingUp
+      ? 'Already have an account? Sign in'
+      : 'Need an account? Create one';
   }
 
   function send(message) {
@@ -554,8 +617,9 @@
       document.querySelectorAll('.mode-button').forEach((modeButton) => modeButton.classList.toggle('active', modeButton === button));
       elements['guest-fields'].hidden = identityMode !== 'guest';
       elements['account-form'].hidden = identityMode !== 'account' || Boolean(authSession?.access_token);
+      elements['account-mode-toggle'].hidden = identityMode !== 'account' || Boolean(authSession?.access_token);
       elements['connect-button'].textContent = identityMode === 'account'
-        ? (authSession?.access_token ? 'Connect with Openboard account' : 'Sign in above to connect')
+        ? (authSession?.access_token ? 'Connect with Openboard account' : accountMode === 'signup' ? 'Create your account above' : 'Sign in above to connect')
         : 'Connect to online tables';
       elements['signed-in-name'].hidden = identityMode !== 'account' || !authSession?.access_token;
     });
@@ -585,6 +649,13 @@
     }
   });
   elements['account-form'].addEventListener('submit', signIn);
+  elements['account-mode-toggle'].addEventListener('click', () => {
+    setAccountMode(accountMode === 'signup' ? 'signin' : 'signup');
+    setFeedback('');
+    elements['connect-button'].textContent = accountMode === 'signup'
+      ? 'Create your account above'
+      : 'Sign in above to connect';
+  });
   elements['connect-button'].addEventListener('click', () => connect());
   elements['create-room'].addEventListener('click', () => send({
     type: 'create-room',
