@@ -12,8 +12,8 @@ const {
 } = require('./uno-game');
 
 const port = Number(process.env.PORT || process.env.UNO_PORT || 3001);
-const supabaseUrl = (process.env.SUPABASE_URL || '').replace(/\/+$/, '');
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || '';
+const supabaseUrl = (process.env.SUPABASE_URL || 'https://ujfytzwwgeocnmkgkhao.supabase.co').replace(/\/+$/, '');
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || 'sb_publishable_ngixVSTMzYQYxQF8VREnAg_c0pI23RQ';
 const allowedOrigins = (process.env.UNO_ALLOWED_ORIGINS || '').split(',').map((item) => item.trim()).filter(Boolean);
 const rooms = new Map();
 const connections = new WeakMap();
