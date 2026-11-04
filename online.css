@@ -514,6 +514,42 @@ dialog::backdrop { background: #100a08bb; backdrop-filter: blur(4px); }
   .embedded-online .chat-panel { min-height: 42px; }
 }
 
+@media (max-width: 760px) {
+  .embedded-online {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    height: auto;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .embedded-online main {
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+  }
+
+  .embedded-online .room-view,
+  .embedded-online .game-view {
+    height: auto;
+    min-height: 0;
+  }
+
+  .embedded-online .game-view {
+    grid-template-rows: auto auto auto;
+    overflow: visible;
+  }
+
+  .embedded-online .table {
+    height: auto;
+    min-height: 510px;
+    overflow: visible;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,*::before,*::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
