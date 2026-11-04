@@ -1,0 +1,16 @@
+{
+  "name": "uno-online-server",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test *.test.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}

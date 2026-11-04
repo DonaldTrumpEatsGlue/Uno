@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#71321e">
+  <title>Play UNO Online</title>
+  <link rel="stylesheet" href="cards.css">
+  <link rel="stylesheet" href="online.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="index.html"><span class="brand-mark">U</span><span>UNO <small>ONLINE</small></span></a>
+    <div class="topbar-status"><span class="status-dot" id="connection-dot"></span><span id="connection-label">Not connected</span></div>
+  </header>
+
+  <main>
+    <section class="view landing" id="landing-view">
+      <div class="hero">
+        <p class="eyebrow">THE TABLE IS OPEN</p>
+        <h1>Play together.<br><span>Call your UNO.</span></h1>
+        <p>Invite friends to a private table or find a public game. House rules from the original Openboard UNO game are on.</p>
+      </div>
+
+      <div class="identity-panel panel">
+        <div class="identity-mode" role="group" aria-label="Online identity">
+          <button type="button" class="mode-button active" data-mode="guest">Play as guest</button>
+          <button type="button" class="mode-button" data-mode="account">Openboard account</button>
+        </div>
+        <div id="guest-fields">
+          <label for="guest-name">Your table name</label>
+          <input id="guest-name" maxlength="20" autocomplete="nickname" placeholder="Choose a name">
+        </div>
+        <form id="account-form" hidden>
+          <label for="account-email">Openboard email</label>
+          <input id="account-email" type="email" autocomplete="username" maxlength="254" placeholder="you@example.com">
+          <label for="account-password">Password</label>
+          <input id="account-password" type="password" autocomplete="current-password" maxlength="72">
+          <button class="quiet-button" type="submit">Sign in</button>
+          <p class="help-text">Use your existing Openboard account. Guest play does not require sign-in.</p>
+        </form>
+        <button class="primary-button connect-button" id="connect-button" type="button">Connect to online tables</button>
+        <p class="feedback" id="identity-feedback" aria-live="polite"></p>
+        <p class="account-name" id="signed-in-name" hidden></p>
+      </div>
+
+      <div class="lobby-grid">
+        <section class="panel room-create">
+          <p class="eyebrow">MAKE A TABLE</p>
+          <h2>Start a room</h2>
+          <label for="room-size">Total seats</label>
+          <select id="room-size"><option value="2">2 seats</option><option value="3">3 seats</option><option value="4" selected>4 seats</option></select>
+          <label class="check-row"><input id="room-public" type="checkbox"> List this room publicly</label>
+          <label class="check-row"><input id="bot-fill-setting" type="checkbox"> Enable bot opponents (also allows solo play)</label>
+          <p class="help-text">When enabled, bots fill every open seat when you start the game.</p>
+          <button class="primary-button" id="create-room" type="button" disabled>Create room</button>
+        </section>
+
+        <section class="panel room-join">
+          <p class="eyebrow">GOT AN INVITE?</p>
+          <h2>Join a room</h2>
+          <label for="room-code">Six-character room code</label>
+          <div class="join-row"><input id="room-code" maxlength="6" autocomplete="off" placeholder="ABC123"><button class="primary-button" id="join-room" type="button" disabled>Join</button></div>
+          <p class="help-text">Private room codes are only shared by their host.</p>
+        </section>
+      </div>
+
+      <section class="panel public-lobby">
+        <div class="section-heading"><div><p class="eyebrow">FIND A GAME</p><h2>Public tables</h2></div><button class="quiet-button" id="refresh-rooms" type="button" disabled>Refresh</button></div>
+        <div id="public-rooms" class="room-list"><p class="empty-state">Connect to see tables that are waiting for players.</p></div>
+      </section>
+      <a class="back-link" href="index.html">← Back to computer UNO</a>
+    </section>
+
+    <section class="view room-view" id="room-view" hidden>
+      <section class="panel room-banner">
+        <div><p class="eyebrow" id="room-visibility-label">PRIVATE ROOM</p><h1>Room <span id="room-code-label"></span></h1><p id="room-status"></p></div>
+        <div class="room-banner-actions"><button class="quiet-button" id="copy-code" type="button">Copy invite code</button><button class="quiet-button" id="leave-room" type="button">Leave room</button></div>
+      </section>
+      <section class="panel room-lobby-panel" id="room-lobby-panel">
+        <p class="eyebrow">AT THE TABLE</p><h2>Players</h2>
+        <div class="player-list" id="lobby-players"></div>
+        <div class="lobby-footer">
+          <div class="lobby-controls">
+            <label class="check-row" id="bot-fill-row"><input id="bot-fill-lobby" type="checkbox"> Fill open seats with bots when starting</label>
+            <p class="help-text" id="room-instructions">Waiting for another player to join.</p>
+          </div>
+          <button class="primary-button" id="start-game" type="button" hidden>Start game</button>
+        </div>
+      </section>
+      <section class="game-view" id="game-view" hidden>
+        <div class="game-topbar panel"><div><p class="eyebrow">YOUR TURN</p><h2 id="turn-status">Waiting for the game…</h2></div><div class="active-color" id="active-color"><span></span><b>Red</b></div></div>
+        <div class="table panel">
+          <div class="other-players" id="other-players"></div>
+          <div class="play-area">
+            <div class="draw-area">
+              <button class="draw-pile" id="draw-card" type="button" aria-label="Draw a card" disabled><span></span><b>DRAW</b></button>
+              <div class="pile-caption"><strong id="draw-count">DRAW PILE</strong><small id="draw-hint"></small></div>
+              <button class="discard-pile" id="top-card" type="button" disabled aria-label="Top discard card"></button>
+            </div>
+            <p class="action-message" id="last-action" aria-live="polite"></p>
+            <div class="penalty-row"><p id="stack-status"></p><button class="quiet-button" id="take-penalty" type="button" hidden>Take penalty</button></div>
+          </div>
+          <div class="my-seat panel">
+            <div class="my-seat-heading"><div><p class="eyebrow">YOUR HAND</p><h2 id="my-name">Player</h2></div><span class="card-count" id="my-card-count">0 cards</span><button class="uno-button" id="call-uno" type="button" disabled>Call UNO!</button></div>
+            <div class="hand" id="my-hand"></div>
+          </div>
+        </div>
+        <section class="panel chat-panel">
+          <div class="section-heading"><div><p class="eyebrow">TABLE CHAT</p><h2>Talk to the players</h2></div></div>
+          <div class="chat-log" id="chat-log" aria-live="polite"></div>
+          <form id="chat-form" class="chat-form"><input id="chat-input" maxlength="240" autocomplete="off" placeholder="Write a message"><button class="quiet-button" type="submit">Send</button></form>
+        </section>
+        <section class="panel result-panel" id="result-panel" hidden><p class="eyebrow">GAME OVER</p><h2 id="result-title"></h2><div class="result-actions"><button class="primary-button" id="rematch" type="button">Play again</button><button class="quiet-button" id="back-to-lobby" type="button">Back to rooms</button></div></section>
+      </section>
+    </section>
+  </main>
+
+  <dialog id="wild-dialog">
+    <form method="dialog" class="wild-picker">
+      <p class="eyebrow">WILD CARD</p><h2>Choose the next color</h2>
+      <div class="wild-colors">
+        <button type="button" data-color="Red" class="wild-choice red">Red</button>
+        <button type="button" data-color="Blue" class="wild-choice blue">Blue</button>
+        <button type="button" data-color="Green" class="wild-choice green">Green</button>
+        <button type="button" data-color="Yellow" class="wild-choice yellow">Yellow</button>
+      </div>
+    </form>
+  </dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="uno-config.js"></script>
+  <script src="online.js"></script>
+</body>
+</html>
