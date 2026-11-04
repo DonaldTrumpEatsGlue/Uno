@@ -7,9 +7,6 @@
 
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
     integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-    integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
-    crossorigin="anonymous"></script>
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
     integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
     crossorigin="anonymous"></script>
@@ -20,20 +17,27 @@
   <link href="styles.css" rel="stylesheet" type="text/css" />
   <link href="cards.css" rel="stylesheet" type="text/css" />
   <link href="animations.css" rel="stylesheet" type="text/css" />
+  <link href="launcher.css" rel="stylesheet" type="text/css" />
 </head>
 
 <body>
-  <div id="setupGame" class="container">
+  <main id="setupGame" class="container launcher">
+    <header class="launcher-header">
+      <a class="launcher-brand" href="index.html"><span class="launcher-mark">U</span><span>UNO<small>PLAY TOGETHER</small></span></a>
+      <a class="launcher-rules" href="rules.html">Rules & Info</a>
+    </header>
     <form class="text-center">
-      <div class="form-group mt-5">
+      <div class="form-group">
+        <p class="launcher-eyebrow">ONE TABLE. YOUR WAY.</p>
+        <h1 class="launcher-title">How do you want to play?</h1>
+      </div>
+      <div class="form-group launcher-settings">
         <label for="playerName">
-          <h1>Player Name</h1>
+          <span>Your name</span>
         </label>
         <input type="text" class="form-control form-size" id="playerName" placeholder="Your name" maxlength="20">
-      </div>
-      <div class="form-group mt-5">
         <label for="amtPlayers">
-          <h1>Number of Players</h1>
+          <span>Total local players (including you)</span>
         </label>
         <select class="form-control form-size" id="amtPlayers">
           <option value="2" selected="selected">2</option>
@@ -41,26 +45,33 @@
           <option value="4">4</option>
         </select>
       </div>
-      <div class="form-group mt-5">
-        <button class="btn btn-primary center-block" type="button" onclick="startGame()">
-          <h1>New Game</h1>
-        </button>
-      </div>
-      <div class="form-group mt-5">
-        <button class="btn btn-success center-block" type="button" onclick="window.location.href='online.html'">
-          <h1>Play Online</h1>
-        </button>
-      </div>
-      <div class="form-group mt-5">
-        <button class="btn btn-primary center-block" type="button" onclick="window.open('rules.html','_self')">
-          <h1>Rules & Info</h1>
-        </button>
+      <div class="launcher-modes">
+        <section class="launcher-mode">
+          <span class="mode-icon">♟</span>
+          <h2>Play with bots</h2>
+          <p>Start a local game against computer opponents. Choose a table size above.</p>
+          <button class="launcher-button" type="button" onclick="startGame()">Start local game</button>
+        </section>
+        <section class="launcher-mode online-mode">
+          <span class="mode-icon">◎</span>
+          <h2>Play online</h2>
+          <p>Invite friends to a private room or find a public table. Add bots to open seats or play solo.</p>
+          <button class="launcher-button" type="button" onclick="showOnlineMode()">Find an online game</button>
+        </section>
       </div>
     </form>
+  </main>
 
-  </div>
+  <main id="onlineMode" class="online-mode-shell" hidden>
+    <div class="online-mode-toolbar">
+      <button class="launcher-back-button" type="button" onclick="showMainMenu()">← All game modes</button>
+      <span>UNO <strong>ONLINE</strong></span>
+    </div>
+    <iframe id="onlineGameFrame" title="UNO online rooms and multiplayer game" src="about:blank" allow="clipboard-write"></iframe>
+  </main>
 
   <div id="playingField" class="container mt-5 d-none">
+    <button class="launcher-back-button game-mode-return" type="button" onclick="showMainMenu()">← All game modes</button>
     <div class="row">
       <div class="col center-card-hands" align="center">
         <div id="TopSeatID"></div>
@@ -130,6 +141,7 @@
     <script type="text/javascript" src="players.js"></script>
     <script type="text/javascript" src="index.js"></script>
     <script type="text/javascript" src="cheats.js"></script>
+    <script type="text/javascript" src="launcher.js"></script>
 </body>
 
 </html>

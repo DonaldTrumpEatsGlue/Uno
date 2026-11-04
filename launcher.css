@@ -1,0 +1,239 @@
+#setupGame.launcher {
+  width: min(940px, calc(100% - 32px));
+  max-width: none;
+  margin: 28px auto 60px;
+  padding: clamp(20px, 4vw, 42px);
+  color: #fff8e9;
+  border: 1px solid #f7e6c52a;
+  border-radius: 22px;
+  background: linear-gradient(135deg, #211915f5, #34231cef);
+  box-shadow: 0 18px 55px #160d0a70;
+}
+
+.launcher-header,
+.online-mode-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.launcher-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  color: #fff8e9;
+  font-weight: 900;
+  letter-spacing: .14em;
+  text-decoration: none;
+}
+
+.launcher-brand small {
+  display: block;
+  color: #ffcb71;
+  font-size: 9px;
+  letter-spacing: .2em;
+}
+
+.launcher-mark {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  color: #28170f;
+  border-radius: 50%;
+  background: #ffcb71;
+  font-size: 24px;
+  transform: rotate(-12deg);
+}
+
+.launcher-rules {
+  color: #d7c6a9;
+  font-size: 13px;
+}
+
+#setupGame .launcher-eyebrow {
+  margin: 36px 0 8px;
+  color: #ffcb71;
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: .2em;
+}
+
+#setupGame .launcher-title {
+  margin: 0 0 27px;
+  color: #fff8e9;
+  font-size: clamp(30px, 5vw, 48px);
+  font-weight: 850;
+  letter-spacing: -.04em;
+}
+
+#setupGame .launcher-settings {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 18px;
+  max-width: 700px;
+  margin: 0 auto 24px;
+  text-align: left;
+}
+
+#setupGame .launcher-settings label {
+  margin: 0 0 4px;
+  color: #d7c6a9;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+#setupGame .launcher-settings input,
+#setupGame .launcher-settings select {
+  width: 100%;
+  height: 46px;
+  padding: 8px 12px;
+  color: #fff8e9;
+  border: 1px solid #ffffff30;
+  border-radius: 9px;
+  background: #17110e;
+  font-size: 16px;
+}
+
+.launcher-modes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  text-align: left;
+}
+
+.launcher-mode {
+  display: grid;
+  align-content: start;
+  justify-items: start;
+  min-height: 225px;
+  padding: 22px;
+  border: 1px solid #ffffff20;
+  border-radius: 16px;
+  background: #120d0b77;
+}
+
+.launcher-mode.online-mode {
+  border-color: #ffcb7155;
+  background: linear-gradient(145deg, #43301f, #241814);
+}
+
+.launcher-mode .mode-icon {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  margin-bottom: 12px;
+  place-items: center;
+  color: #25180d;
+  border-radius: 11px;
+  background: #ffcb71;
+  font-size: 23px;
+  font-weight: 800;
+}
+
+.launcher-mode h2 {
+  margin: 0 0 7px;
+  color: #fff8e9;
+  font-size: 21px;
+  font-weight: 800;
+}
+
+.launcher-mode p {
+  min-height: 42px;
+  margin: 0 0 18px;
+  color: #d7c6a9;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.launcher-button,
+.launcher-back-button {
+  min-height: 42px;
+  padding: 10px 16px;
+  color: #28170f;
+  border: 0;
+  border-radius: 9px;
+  background: #ffcb71;
+  font-weight: 850;
+}
+
+.launcher-button:hover,
+.launcher-back-button:hover {
+  filter: brightness(1.07);
+}
+
+.online-mode-shell {
+  width: min(1180px, calc(100% - 24px));
+  margin: 12px auto 35px;
+  overflow: hidden;
+  border: 1px solid #f7e6c52a;
+  border-radius: 18px;
+  background: #17110e;
+  box-shadow: 0 18px 55px #160d0a70;
+}
+
+.online-mode-toolbar {
+  position: relative;
+  z-index: 1;
+  min-height: 56px;
+  padding: 8px 16px;
+  border-bottom: 1px solid #ffffff20;
+  background: #17110e;
+}
+
+.online-mode-toolbar > span {
+  color: #fff8e9;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: .12em;
+}
+
+.online-mode-toolbar strong {
+  color: #ffcb71;
+}
+
+.launcher-back-button {
+  min-height: 36px;
+  padding: 7px 12px;
+  color: #fff8e9;
+  border: 1px solid #ffffff24;
+  background: #ffffff0b;
+  font-size: 12px;
+}
+
+#onlineGameFrame {
+  display: block;
+  width: 100%;
+  height: 780px;
+  border: 0;
+  background: #211915;
+}
+
+.game-mode-return {
+  margin-bottom: 16px;
+}
+
+@media (max-width: 640px) {
+  #setupGame .launcher-settings,
+  .launcher-modes {
+    grid-template-columns: 1fr;
+  }
+
+  .launcher-mode {
+    min-height: 0;
+  }
+
+  .launcher-mode p {
+    min-height: 0;
+  }
+
+  .online-mode-shell {
+    width: calc(100% - 12px);
+    margin-top: 6px;
+  }
+
+  .online-mode-toolbar {
+    padding: 8px;
+  }
+}

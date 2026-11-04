@@ -154,3 +154,27 @@ dialog::backdrop { background: #100a08bb; backdrop-filter: blur(4px); }
   .hand { gap: 7px 3px; }
   .hand .card { margin: 0 -4px; }
 }
+
+.embedded-online {
+  min-height: 0;
+}
+
+.embedded-online .topbar,
+.embedded-online .hero,
+.embedded-online .back-link {
+  display: none;
+}
+
+.embedded-online main {
+  width: min(1120px, calc(100% - 24px));
+  margin: 20px auto 30px;
+}
+
+.embedded-online .landing {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+}
+
+.embedded-online .identity-panel {
+  grid-column: 1 / -1;
+}

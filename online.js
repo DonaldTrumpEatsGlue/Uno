@@ -3,6 +3,7 @@
   const elements = Object.fromEntries([...document.querySelectorAll('[id]')].map((element) => [element.id, element]));
   const colors = ['Red', 'Blue', 'Green', 'Yellow'];
   const storedSessionKey = 'uno-openboard-session';
+  const savedNameKey = 'uno-player-name';
   const resumeStorageKey = 'uno-online-resume';
   const botPreferenceKey = 'uno-online-bot-fill';
   let authSession = readStoredSession();
@@ -18,6 +19,9 @@
   let reconnectTimer = null;
   let isReconnecting = false;
   let toastTimer = null;
+  const embedded = new URLSearchParams(location.search).get('embed') === '1';
+
+  if (embedded) document.body.classList.add('embedded-online');
 
   function readBotPreference() {
     try {
@@ -58,6 +62,12 @@
 
   function setFeedback(message = '') {
     elements['identity-feedback'].textContent = message;
+  }
+
+  function reportEmbeddedHeight() {
+    if (embedded && window.parent !== window) {
+      window.parent.postMessage({ type: 'uno-embed-resize', height: document.documentElement.scrollHeight }, location.origin);
+    }
   }
 
   function showToast(message) {
@@ -209,6 +219,17 @@
     if (message.type === 'error') {
       setFeedback(message.message);
       showToast(message.message);
+      if (isReconnecting) {
+        isReconnecting = false;
+        reconnectData = null;
+        currentRoom = null;
+        currentGame = null;
+        sessionStorage.removeItem(resumeStorageKey);
+        elements['room-view'].hidden = true;
+        elements['landing-view'].hidden = false;
+        socket?.close();
+        setTimeout(() => connect(false), 250);
+      }
     } else if (message.type === 'identified') {
       playerId = message.playerId;
       playerName = message.name;
@@ -472,6 +493,30 @@
         : 'Connect to online tables';
       elements['signed-in-name'].hidden = identityMode !== 'account' || !authSession?.access_token;
     });
+    if (embedded) {
+      try {
+        elements['guest-name'].value = localStorage.getItem(savedNameKey) || '';
+      } catch (error) {
+        console.error('Could not read the shared player name:', error);
+      }
+      elements['guest-name'].addEventListener('input', () => {
+        try {
+          localStorage.setItem(savedNameKey, elements['guest-name'].value);
+        } catch (error) {
+          console.error('Could not save the shared player name:', error);
+        }
+      });
+      elements['online-back-link'].addEventListener('click', (event) => {
+        event.preventDefault();
+        window.parent.postMessage({ type: 'uno-embed-close' }, location.origin);
+      });
+      window.addEventListener('message', (event) => {
+        if (event.origin !== location.origin || event.source !== window.parent || event.data?.type !== 'uno-leave-room') return;
+        clearRoom();
+      });
+      new ResizeObserver(reportEmbeddedHeight).observe(document.body);
+      reportEmbeddedHeight();
+    }
   });
   elements['account-form'].addEventListener('submit', signIn);
   elements['connect-button'].addEventListener('click', () => connect());
@@ -541,4 +586,5 @@
 
   if (reconnectData) connect(true);
   else renderPublicRooms();
+  reportEmbeddedHeight();
 })();

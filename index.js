@@ -165,6 +165,11 @@ function startGame() {
     playerNameInput.classList.add("is-invalid");
     return;
   }
+  try {
+    localStorage.setItem("uno-player-name", playerName);
+  } catch (error) {
+    console.error("Could not save the player name:", error);
+  }
   document.getElementById("setupGame").classList.add("d-none");
   document.getElementById("playingField").classList.remove("d-none");
   let playerAmtDiv = document.getElementById("amtPlayers");
