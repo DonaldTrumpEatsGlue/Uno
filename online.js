@@ -153,7 +153,7 @@
           throw new Error('That username is already taken. Choose a different one.');
         }
         const signupUrl = new URL(`${settings.supabaseUrl.replace(/\/+$/, '')}/auth/v1/signup`);
-        signupUrl.searchParams.set('redirect_to', 'https://donaldtrumpeatsglue.github.io/OpenBoard-Chess/');
+        signupUrl.searchParams.set('redirect_to', getEmailConfirmationRedirectUrl());
         response = await fetch(signupUrl, {
           method: 'POST',
           headers: { apikey: settings.supabaseAnonKey, 'Content-Type': 'application/json' },
@@ -213,6 +213,58 @@
     elements['account-mode-toggle'].textContent = signingUp
       ? 'Already have an account? Sign in'
       : 'Need an account? Create one';
+  }
+
+  function getEmailConfirmationRedirectUrl() {
+    const redirectUrl = new URL(location.href);
+    redirectUrl.search = '';
+    redirectUrl.hash = '';
+    return redirectUrl.toString();
+  }
+
+  function handleAuthCallback() {
+    const fragment = new URLSearchParams(location.hash.replace(/^#/, ''));
+    const accessToken = fragment.get('access_token');
+    const refreshToken = fragment.get('refresh_token');
+    const query = new URLSearchParams(location.search);
+    const error = fragment.get('error_description')
+      || fragment.get('error')
+      || query.get('error_description')
+      || query.get('error');
+
+    if (accessToken && refreshToken) {
+      authSession = {
+        access_token: accessToken,
+        refresh_token: refreshToken,
+        expires_in: fragment.get('expires_in') || '3600',
+        token_type: fragment.get('token_type') || 'bearer',
+      };
+      localStorage.setItem(storedSessionKey, JSON.stringify(authSession));
+      identityMode = 'account';
+      setFeedback(fragment.get('type') === 'signup'
+        ? 'Email confirmed. Your shared Openboard account is verified and ready to connect.'
+        : 'Signed in. Connect to enter a room.');
+    } else if (error) {
+      identityMode = 'account';
+      setFeedback(`Email confirmation failed: ${error}`);
+    } else {
+      return;
+    }
+
+    history.replaceState(null, '', location.pathname);
+    document.querySelectorAll('.mode-button').forEach((button) => {
+      button.classList.toggle('active', button.dataset.mode === 'account');
+    });
+    elements['guest-fields'].hidden = true;
+    elements['account-form'].hidden = Boolean(authSession?.access_token);
+    elements['account-mode-toggle'].hidden = Boolean(authSession?.access_token);
+    elements['signed-in-name'].hidden = !authSession?.access_token;
+    elements['signed-in-name'].textContent = authSession?.access_token
+      ? 'Email confirmed. Connect to enter a room.'
+      : '';
+    elements['connect-button'].textContent = authSession?.access_token
+      ? 'Connect with Openboard account'
+      : 'Sign in above to connect';
   }
 
   function send(message) {
@@ -709,6 +761,8 @@
   });
   elements.rematch.addEventListener('click', () => send({ type: 'rematch' }));
   elements['back-to-lobby'].addEventListener('click', clearRoom);
+
+  handleAuthCallback();
 
   if (authSession?.access_token) {
     identityMode = 'account';
