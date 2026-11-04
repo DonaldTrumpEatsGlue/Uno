@@ -122,10 +122,23 @@ input:focus,select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px #f
 .card-count { margin-left: auto; color: #e4d3bb; font-size: 12px; }
 .uno-button { padding: 10px 15px; color: #fff; border: 1px solid #006fe6; border-radius: 8px; background: #007bff; font-weight: 700; box-shadow: 0 3px 8px #0005; }
 .turn-actions .uno-button { min-width: 104px; font-size: 16px; }
-.hand { display: flex; justify-content: safe center; align-items: flex-end; flex-wrap: nowrap; gap: 0; min-width: 0; width: 100%; min-height: 172px; overflow-x: auto; overflow-y: hidden; padding: 18px 10px 4px; scrollbar-width: thin; scrollbar-color: #9c8060 transparent; }
-.hand .card { flex: 0 0 auto; width: clamp(64px,8vw,104px); height: clamp(98px,12vw,158px); margin: 0 clamp(-24px,-1.8vw,-12px); border-width: 4px; font-size: clamp(48px,7vw,86px); transition: transform .14s, margin .14s; }
-.hand .card:before,.hand .card:after { font-size: 13px; }
-.hand .card .mark { padding: 0 12px; }
+.hand { display: flex; justify-content: safe center; align-items: flex-end; flex-wrap: nowrap; gap: 6px; min-width: 0; width: 100%; min-height: 172px; overflow-x: auto; overflow-y: hidden; padding: 18px 10px 4px; scrollbar-width: thin; scrollbar-color: #9c8060 transparent; }
+.hand .card { flex: 0 0 auto; width: clamp(64px,8vw,104px); height: clamp(98px,12vw,158px); margin: 0; border-width: 4px; font-size: clamp(48px,7vw,86px); transition: transform .14s; }
+.table .card:before,.table .card:after { font-size: clamp(8px,1vw,13px); }
+.table .card { display: grid; place-items: center; padding: 4px; }
+.table .card .inner { display: grid; width: 100%; height: 100%; place-items: center; }
+.table .card .mark { display: grid; width: 72%; height: 76%; place-items: center; padding: 0; border-radius: 50%; font-size: inherit; line-height: 1; }
+.table .card.draw2 .mark,.table .card.plus-4 .mark { font-size: 0; }
+.table .card.draw2 .mark > .cardsInInnerPlus2,.table .card.plus-4 .mark > .cardsInInnerPlus4 { display: none; }
+.table .card.draw2 .mark::after,.table .card.plus-4 .mark::after { display: block; color: #17110e; font-size: clamp(16px,3vw,34px); font-weight: 900; line-height: 1; text-shadow: none; }
+.table .card.draw2 .mark::after { content: "+2"; }
+.table .card.plus-4 .mark::after { content: "+4"; }
+.table .card.wild .mark { position: relative; background: transparent; font-size: 0; }
+.table .card.wild .circle-container { position: absolute; top: 11%; left: 11%; display: grid; grid-template: repeat(2,1fr) / repeat(2,1fr); float: none; width: 78%; height: 78%; overflow: hidden; border-radius: 50%; transform: rotate(18deg) skew(-9deg,0); }
+.table .card.wild .circle-container .quarter { width: auto; height: auto; float: none; }
+.table .card.wild .circle-container .inner { display: none; }
+.table .card.wild .mark { z-index: 1; }
+.table .card.wild .mark .circle-container { z-index: -1; }
 .hand .card:hover:not(:disabled),.hand .card.selected { z-index: 1; transform: translateY(-12px); }
 .hand button.card { cursor: pointer; }
 .hand button.card:disabled { opacity: 1; filter: none; cursor: not-allowed; }
@@ -177,8 +190,8 @@ dialog::backdrop { background: #100a08bb; backdrop-filter: blur(4px); }
   .my-seat-heading { flex-wrap: wrap; }
   .card-count { margin-left: auto; }
   .hand { min-height: 110px; padding: 12px 6px 4px; }
-  .hand .card { width: clamp(40px,14vw,64px); height: clamp(62px,22vw,98px); margin: 0 clamp(-19px,-6vw,-9px); border-width: 3px; font-size: clamp(30px,10vw,54px); }
-  .hand .card .mark { padding: 0 6px; }
+  .hand { gap: 4px; }
+  .hand .card { width: clamp(36px,10vw,52px); height: clamp(55px,14vw,76px); border-width: 3px; font-size: clamp(26px,7vw,36px); }
 }
 
 @media (max-width: 420px) {
