@@ -6,9 +6,9 @@
 function addCSSDesignToBackOfCard(cardDiv, cardSpanInner) {
     cardDiv.classList.add("black");
     cardSpanInner.append("_");
-    $(cardSpanInner).css("color", "#c72a18");
-    $(cardSpanInner).css("background-color", "#c72a18");
-    $(cardSpanInner).css("text-shadow", "#c72a18 1px 1px 1px");
+    cardSpanInner.style.color = "#c72a18";
+    cardSpanInner.style.backgroundColor = "#c72a18";
+    cardSpanInner.style.textShadow = "#c72a18 1px 1px 1px";
 }
 
 /**
@@ -62,8 +62,8 @@ function addCSSDesignToCard(cardDiv, cardSpanInner, cardValue) {
         case 10:
             cardDiv.classList.add("draw2");
             cardSpanInner.append("_");
-            $(cardSpanInner).css("color", "white");
-            $(cardSpanInner).css("text-shadow", "#fff 1px 1px 1px");
+            cardSpanInner.style.color = "white";
+            cardSpanInner.style.textShadow = "#fff 1px 1px 1px";
 
             // first inner card drawing
             let specialClassDiv = document.createElement("div");
@@ -98,8 +98,8 @@ function addCSSDesignToCard(cardDiv, cardSpanInner, cardValue) {
             cardDiv.classList.add("wild");
             cardDiv.classList.add("black");
             cardSpanInner.append("_");
-            $(cardSpanInner).css("color", "white");
-            $(cardSpanInner).css("text-shadow", "#fff 1px 1px 1px");
+            cardSpanInner.style.color = "white";
+            cardSpanInner.style.textShadow = "#fff 1px 1px 1px";
 
             // div circle container
             let specialClassDiv9 = document.createElement("div");
@@ -136,8 +136,8 @@ function addCSSDesignToCard(cardDiv, cardSpanInner, cardValue) {
             cardDiv.classList.add("plus-4");
             cardDiv.classList.add("black");
             cardSpanInner.append("_");
-            $(cardSpanInner).css("color", "white");
-            $(cardSpanInner).css("text-shadow", "#fff 1px 1px 1px");
+            cardSpanInner.style.color = "white";
+            cardSpanInner.style.textShadow = "#fff 1px 1px 1px";
 
             // div card green
             let specialClassDiv19 = document.createElement("div");

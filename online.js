@@ -382,16 +382,23 @@
 
     const others = elements['other-players'];
     others.replaceChildren();
-    for (const player of players.filter((candidate) => candidate.id !== playerId)) {
+    const otherPlayers = players.filter((candidate) => candidate.id !== playerId);
+    const seatOrder = {
+      1: ['top'],
+      2: ['right', 'top'],
+      3: ['right', 'top', 'left'],
+    }[otherPlayers.length] || [];
+    for (const [index, player] of otherPlayers.entries()) {
       const tile = document.createElement('div');
       tile.className = `other-player${game.turnPlayerId === player.id ? ' active' : ''}${player.isBot ? ' bot-player' : ''}`;
+      tile.dataset.seat = seatOrder[index] || 'top';
       const name = document.createElement('strong');
       name.textContent = player.name + (player.isBot ? ' · BOT' : '');
       const count = document.createElement('small');
       count.textContent = `${player.cardCount} cards${player.connected ? '' : ' · reconnecting'}`;
       const backs = document.createElement('div');
       backs.className = 'card-fan';
-      const visibleBacks = Math.min(player.cardCount, 5);
+      const visibleBacks = Math.min(player.cardCount, 7);
       for (let index = 0; index < visibleBacks; index += 1) {
         const back = document.createElement('span');
         back.className = 'mini-back';
@@ -454,15 +461,7 @@
     inner.className = 'inner';
     const mark = document.createElement('span');
     mark.className = 'mark';
-    const valueClasses = { 10: 'draw2', 11: 'reverse', 12: 'skip', 13: 'wild', 14: 'plus-4' };
-    if (card.value <= 9) {
-      element.classList.add(`num-${card.value}`);
-      mark.textContent = String(card.value);
-    } else {
-      element.classList.add(valueClasses[card.value] || 'wild');
-      mark.textContent = card.value === 10 ? '+2' : card.value === 11 ? '↻' : card.value === 12 ? '⊘'
-        : card.value === 13 ? 'WILD' : '+4';
-    }
+    addCSSDesignToCard(element, mark, card.value);
     const classColor = card.color === 'Special' ? 'black' : card.color.toLowerCase();
     element.classList.add(classColor);
     inner.append(mark);

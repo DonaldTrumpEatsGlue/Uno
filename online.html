@@ -97,12 +97,16 @@
               <button class="draw-pile" id="draw-card" type="button" aria-label="Draw a card" disabled><span></span><b>DRAW</b></button>
               <div class="pile-caption"><strong id="draw-count">DRAW PILE</strong><small id="draw-hint"></small></div>
               <button class="discard-pile" id="top-card" type="button" disabled aria-label="Top discard card"></button>
+              <div class="turn-actions">
+                <button class="uno-button" id="call-uno" type="button" disabled>Call UNO!</button>
+                <button class="quiet-button" id="take-penalty" type="button" hidden>Take penalty</button>
+              </div>
             </div>
             <p class="action-message" id="last-action" aria-live="polite"></p>
-            <div class="penalty-row"><p id="stack-status"></p><button class="quiet-button" id="take-penalty" type="button" hidden>Take penalty</button></div>
+            <div class="penalty-row"><p id="stack-status"></p></div>
           </div>
           <div class="my-seat panel">
-            <div class="my-seat-heading"><div><p class="eyebrow">YOUR HAND</p><h2 id="my-name">Player</h2></div><span class="card-count" id="my-card-count">0 cards</span><button class="uno-button" id="call-uno" type="button" disabled>Call UNO!</button></div>
+            <div class="my-seat-heading"><div><p class="eyebrow">YOUR HAND</p><h2 id="my-name">Player</h2></div><span class="card-count" id="my-card-count">0 cards</span></div>
             <div class="hand" id="my-hand"></div>
           </div>
         </div>
@@ -129,6 +133,7 @@
   </dialog>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="uno-config.js"></script>
+  <script src="addCSSToCards.js"></script>
   <script src="online.js"></script>
 </body>
 </html>

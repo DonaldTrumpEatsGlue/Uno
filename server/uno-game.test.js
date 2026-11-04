@@ -35,6 +35,15 @@ function gameWithHands(hands, options = {}) {
   };
 }
 
+test('new games automatically deal seven cards to every player', () => {
+  const game = createGame([
+    { id: 'p0', name: 'Player 0' },
+    { id: 'p1', name: 'Player 1' },
+    { id: 'p2', name: 'Player 2' },
+  ]);
+  assert.deepEqual(game.players.map((player) => player.hand.length), [7, 7, 7]);
+});
+
 test('play validates ownership, turn and matching color or value', () => {
   const game = gameWithHands([[{ id: 'a', color: 'Blue', value: 7 }], []]);
   assert.throws(() => playCard(game, 'p1', 'a', null), /not your turn/);
