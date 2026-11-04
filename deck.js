@@ -74,6 +74,7 @@ function Deck(divId, hidden) {
 
         // if drawing a card, player cannot have Uno
         players[gameTurn].unoCall = false;
+        updateUnoButton();
     };
 
     /**

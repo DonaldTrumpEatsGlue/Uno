@@ -181,6 +181,11 @@ function startGame() {
 }
 
 function play() {
+  updateUnoButton();
+
+  let currentPlayer = players[gameTurn];
+  if (!currentPlayer) return;
+
   if (players[gameTurn].isBot) {
     setTimeout(function () {
       for (let i = 0; i < players.length; i++) {
@@ -207,14 +212,22 @@ function play() {
   }
 }
 
+function updateUnoButton() {
+  let currentPlayer = players[gameTurn];
+  let button = document.querySelector("#unoButton button");
+  button.disabled =
+    !currentPlayer ||
+    currentPlayer.isBot ||
+    currentPlayer.playerDeck.amtCards !== 2 ||
+    currentPlayer.unoCall;
+}
+
 /**
  * Uno call button
  */
 function callUno() {
-  if (players[gameTurn].playerDeck.amtCards > 2) {
-    players[gameTurn].playerDeck.drawCard();
-    players[gameTurn].playerDeck.drawCard();
-  } else {
-    players[gameTurn].unoCall = true;
-  }
+  let currentPlayer = players[gameTurn];
+  if (!currentPlayer || currentPlayer.isBot || currentPlayer.playerDeck.amtCards !== 2) return;
+  currentPlayer.unoCall = true;
+  updateUnoButton();
 }

@@ -4,14 +4,13 @@
  * @param {*} id
  * @param {*} index
  * @param {*} bot
- * @param {*} unoCall
  */
 function Player(deck, id, index, bot, unoCall) {
   this.isBot = bot;
   this.playerDeck = deck;
   this.playerID = id;
   this.playerIndex = index;
-  this.playerUnoCall = unoCall;
+  this.unoCall = unoCall;
   this.botLogic = function () {
     let numBotCards = this.playerDeck.amtCards;
 
