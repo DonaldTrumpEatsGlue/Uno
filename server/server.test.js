@@ -49,7 +49,20 @@ test('online rooms protect hands, enforce host actions, and require unanimous re
     rooms.clear();
   });
 
+  const lobbyBrowser = await connectPlayer('Lobby Browser');
   const host = await connectPlayer('Table Host');
+  const publicCreated = waitFor(lobbyBrowser, 'public-rooms', (message) => message.rooms.length === 1);
+  const publicRoomCreated = waitFor(host, 'room-created');
+  host.send(JSON.stringify({ type: 'create-room', visibility: 'public', maxPlayers: 2 }));
+  const publicRoom = await publicRoomCreated;
+  assert.equal((await publicCreated).rooms[0].code, publicRoom.code);
+
+  const publicRoomRemoved = waitFor(lobbyBrowser, 'public-rooms', (message) => (
+    !message.rooms.some((room) => room.code === publicRoom.code)
+  ));
+  host.send(JSON.stringify({ type: 'leave-room' }));
+  assert.deepEqual((await publicRoomRemoved).rooms, []);
+
   const created = waitFor(host, 'room-created');
   host.send(JSON.stringify({ type: 'create-room', visibility: 'private', maxPlayers: 2 }));
   const room = await created;

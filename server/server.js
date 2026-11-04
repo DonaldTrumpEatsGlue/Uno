@@ -204,6 +204,7 @@ function removePlayer(room, playerId, reason = '') {
   if (!room.players.some((candidate) => !candidate.isBot)) {
     clearTimeout(room.botTimer);
     rooms.delete(room.code);
+    broadcastPublicRooms();
     return;
   }
   broadcastRoom(room);
@@ -484,6 +485,7 @@ wss.on('connection', (socket) => {
 
 const cleanupTimer = setInterval(() => {
   const now = Date.now();
+  let removedRoom = false;
   for (const room of rooms.values()) {
     if (now >= room.expiresAt) {
       for (const player of room.players) {
@@ -491,8 +493,10 @@ const cleanupTimer = setInterval(() => {
         player.socket = null;
       }
       rooms.delete(room.code);
+      removedRoom = true;
     }
   }
+  if (removedRoom) broadcastPublicRooms();
 }, 60_000);
 cleanupTimer.unref?.();
 

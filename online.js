@@ -15,6 +15,8 @@
   let currentRoom = null;
   let currentGame = null;
   let publicRoomList = [];
+  let shouldStayConnected = false;
+  let reconnectAttempts = 0;
   let reconnectData = readResumeData();
   let reconnectTimer = null;
   let isReconnecting = false;
@@ -211,11 +213,14 @@
     });
     socket.addEventListener('close', () => {
       setConnectionState(false, 'Disconnected');
-      if (currentRoom && reconnectData && !reconnectTimer) {
+      if (shouldStayConnected && !reconnectTimer) {
+        const delay = Math.min(1200 * (2 ** reconnectAttempts), 10_000);
+        reconnectAttempts += 1;
+        setConnectionState(false, 'Reconnecting…');
         reconnectTimer = setTimeout(() => {
           reconnectTimer = null;
           connect(true);
-        }, 1200);
+        }, delay);
       }
     });
   }
@@ -226,6 +231,7 @@
       showToast(message.message);
       if (isReconnecting) {
         isReconnecting = false;
+        shouldStayConnected = false;
         reconnectData = null;
         currentRoom = null;
         currentGame = null;
@@ -238,6 +244,8 @@
     } else if (message.type === 'identified') {
       playerId = message.playerId;
       playerName = message.name;
+      shouldStayConnected = true;
+      reconnectAttempts = 0;
       setConnectionState(true, `Connected as ${playerName}`);
       elements['signed-in-name'].hidden = identityMode !== 'account';
       if (identityMode === 'account') elements['signed-in-name'].textContent = `Playing as @${playerName}`;
