@@ -42,8 +42,8 @@
 
   window.addEventListener('message', (event) => {
     if (event.origin !== location.origin || event.source !== onlineFrame.contentWindow) return;
-    if (event.data?.type === 'uno-embed-resize' && Number.isFinite(event.data.height)) {
-      onlineFrame.style.height = `${Math.max(620, event.data.height)}px`;
+    if (event.data?.type === 'uno-embed-state') {
+      onlineMode.classList.toggle('game-active', event.data.inGame === true);
     } else if (event.data?.type === 'uno-embed-close') {
       window.showMainMenu();
     }

@@ -19,6 +19,8 @@
   let reconnectTimer = null;
   let isReconnecting = false;
   let toastTimer = null;
+  const previousCardCounts = new Map();
+  let lastRenderedTopCardId = null;
   const embedded = new URLSearchParams(location.search).get('embed') === '1';
 
   if (embedded) document.body.classList.add('embedded-online');
@@ -66,7 +68,10 @@
 
   function reportEmbeddedHeight() {
     if (embedded && window.parent !== window) {
-      window.parent.postMessage({ type: 'uno-embed-resize', height: document.documentElement.scrollHeight }, location.origin);
+      window.parent.postMessage({
+        type: 'uno-embed-state',
+        inGame: Boolean(currentRoom && currentRoom.status !== 'waiting'),
+      }, location.origin);
     }
   }
 
@@ -321,6 +326,7 @@
     elements['room-status'].textContent = room.status === 'waiting'
       ? 'Waiting for players to join. Share the code with friends.'
       : room.status === 'playing' ? 'Match in progress.' : 'This match has ended.';
+    reportEmbeddedHeight();
 
     const me = players.find((player) => player.id === playerId);
     const lobbyPlayers = elements['lobby-players'];
@@ -358,13 +364,18 @@
     const isMyTurn = game.turnPlayerId === playerId && room.status === 'playing';
     const ownGamePlayer = game.hand;
     const hand = elements['my-hand'];
+    const previousHandScroll = hand.scrollLeft;
     hand.replaceChildren();
     elements['my-name'].textContent = me?.name || playerName || 'You';
     elements['my-card-count'].textContent = `${ownGamePlayer.length} ${ownGamePlayer.length === 1 ? 'card' : 'cards'}`;
+    elements['my-avatar'].textContent = (me?.name || playerName || 'Y').trim().charAt(0).toUpperCase();
 
     for (const card of ownGamePlayer) {
       const button = createCard(card, true);
-      button.disabled = !isMyTurn || !isPlayable(game, card);
+      const playable = isPlayable(game, card);
+      button.classList.toggle('playable', playable);
+      button.dataset.cardId = card.id;
+      button.disabled = !isMyTurn || !playable;
       button.setAttribute('aria-label', describeCard(card));
       button.addEventListener('click', () => {
         if ([13, 14].includes(card.value)) {
@@ -379,6 +390,7 @@
       });
       hand.append(button);
     }
+    hand.scrollLeft = Math.min(previousHandScroll, hand.scrollWidth - hand.clientWidth);
 
     const others = elements['other-players'];
     others.replaceChildren();
@@ -392,30 +404,55 @@
       const tile = document.createElement('div');
       tile.className = `other-player${game.turnPlayerId === player.id ? ' active' : ''}${player.isBot ? ' bot-player' : ''}`;
       tile.dataset.seat = seatOrder[index] || 'top';
+      const avatar = document.createElement('span');
+      avatar.className = 'player-avatar';
+      avatar.setAttribute('aria-hidden', 'true');
+      avatar.textContent = player.isBot ? 'BOT' : player.name.trim().charAt(0).toUpperCase();
       const name = document.createElement('strong');
       name.textContent = player.name + (player.isBot ? ' · BOT' : '');
       const count = document.createElement('small');
       count.textContent = `${player.cardCount} cards${player.connected ? '' : ' · reconnecting'}`;
       const backs = document.createElement('div');
       backs.className = 'card-fan';
+      const previousCount = previousCardCounts.get(player.id) ?? player.cardCount;
+      const justDrew = player.cardCount > previousCount;
       const visibleBacks = Math.min(player.cardCount, 7);
       for (let index = 0; index < visibleBacks; index += 1) {
         const back = document.createElement('span');
         back.className = 'mini-back';
+        if (justDrew && index >= Math.max(0, previousCount)) back.classList.add('just-drew');
         backs.append(back);
       }
-      tile.append(name, backs, count);
+      tile.append(avatar, name, backs, count);
       others.append(tile);
+      previousCardCounts.set(player.id, player.cardCount);
     }
 
     const discard = createCard({ ...game.topCard, color: [13, 14].includes(game.topCard.value) ? 'Special' : game.activeColor }, false);
     discard.classList.add('top-card');
+    discard.setAttribute('aria-hidden', 'true');
+    if (lastRenderedTopCardId !== game.topCard.id) discard.classList.add('card-arriving');
     elements['top-card'].replaceChildren(discard);
+    lastRenderedTopCardId = game.topCard.id;
     elements['active-color'].className = `active-color ${game.activeColor.toLowerCase()}`;
     elements['active-color'].querySelector('b').textContent = game.activeColor;
+    elements['direction-status'].textContent = game.direction === 1 ? 'Clockwise' : 'Counter-clockwise';
     elements['turn-status'].textContent = game.winnerId
       ? (game.winnerId === playerId ? 'You won!' : `${players.find((player) => player.id === game.winnerId)?.name || 'A player'} won`)
       : isMyTurn ? 'Your turn' : `Waiting for ${players.find((player) => player.id === game.turnPlayerId)?.name || 'a player'}`;
+    elements['turn-label'].textContent = game.winnerId ? 'MATCH COMPLETE' : isMyTurn ? 'YOUR TURN' : 'TURN IN PROGRESS';
+    elements['turn-prompt'].textContent = game.winnerId
+      ? 'The table is ready for a rematch.'
+      : game.drawStack
+        ? `Draw penalty +${(game.drawStack.value === 10 ? 2 : 4) * game.drawStack.count} · stack the same card or take the penalty.`
+        : isMyTurn && ownGamePlayer.some((card) => isPlayable(game, card))
+          ? 'Play one of the highlighted cards.'
+          : isMyTurn ? 'No matching card — draw to continue.' : 'Waiting for the active player to make a move.';
+    elements['action-status'].textContent = game.winnerId
+      ? 'Game over'
+      : game.drawStack
+        ? `PENALTY +${(game.drawStack.value === 10 ? 2 : 4) * game.drawStack.count}`
+        : 'Match in progress';
     elements['draw-hint'].textContent = isMyTurn && !game.drawStack
       ? (ownGamePlayer.some((card) => isPlayable(game, card)) ? 'Play a matching card' : 'No match · draw')
       : '';
@@ -427,12 +464,34 @@
     elements['stack-status'].textContent = game.drawStack
       ? `Draw stack: +${(game.drawStack.value === 10 ? 2 : 4) * game.drawStack.count}. Play the same draw card or take them.`
       : '';
-    elements['call-uno'].disabled = !isMyTurn || ownGamePlayer.length !== 2;
+    elements['call-uno'].hidden = ownGamePlayer.length !== 2;
+    elements['call-uno'].disabled = !isMyTurn;
+    elements['uno-reminder'].hidden = !isMyTurn || ownGamePlayer.length !== 2;
     elements['last-action'].textContent = game.lastAction;
     elements['result-panel'].hidden = room.status !== 'finished';
     elements['result-title'].textContent = game.winnerId === playerId ? 'You won the table!' : game.winnerId
       ? `${players.find((player) => player.id === game.winnerId)?.name || 'A player'} won!`
       : game.lastAction;
+    const winner = players.find((player) => player.id === game.winnerId);
+    elements['result-avatar'].textContent = winner?.isBot ? 'BOT' : (winner?.name || '★').trim().charAt(0).toUpperCase();
+    elements['result-message'].textContent = game.winnerId === playerId
+      ? 'Congratulations! You cleared your hand and won the table.'
+      : `${winner?.name || 'The winner'} cleared their hand. Rematch?`;
+    const standings = [...players].sort((first, second) => {
+      if (first.id === game.winnerId) return -1;
+      if (second.id === game.winnerId) return 1;
+      return first.cardCount - second.cardCount;
+    });
+    elements['final-standings'].replaceChildren();
+    for (const [index, player] of standings.entries()) {
+      const item = document.createElement('li');
+      const rank = document.createElement('span');
+      rank.textContent = `${index + 1}. ${player.name}${player.id === playerId ? ' (you)' : ''}`;
+      const cards = document.createElement('strong');
+      cards.textContent = player.id === game.winnerId ? 'Winner' : `${player.cardCount} left`;
+      item.append(rank, cards);
+      elements['final-standings'].append(item);
+    }
     elements.rematch.textContent = room.hasVotedRematch
       ? `Waiting for players (${room.rematchVotes}/${players.filter((player) => !player.isBot).length})`
       : `Vote for rematch (${room.rematchVotes}/${players.filter((player) => !player.isBot).length})`;

@@ -89,33 +89,52 @@
         </div>
       </section>
       <section class="game-view" id="game-view" hidden>
-        <div class="game-topbar panel"><div><p class="eyebrow">YOUR TURN</p><h2 id="turn-status">Waiting for the game…</h2></div><div class="active-color" id="active-color"><span></span><b>Red</b></div></div>
+        <div class="game-topbar panel">
+          <div class="turn-summary"><p class="eyebrow" id="turn-label">TURN STATUS</p><h2 id="turn-status">Waiting for the game…</h2><p id="turn-prompt" class="turn-prompt"></p></div>
+          <div class="game-indicators">
+            <div class="active-color" id="active-color"><span></span><b>Red</b></div>
+            <span class="status-chip" id="direction-status" aria-label="Turn direction">Clockwise</span>
+            <span class="status-chip" id="action-status">Match in progress</span>
+          </div>
+        </div>
         <div class="table panel">
           <div class="other-players" id="other-players"></div>
           <div class="play-area">
             <div class="draw-area">
               <button class="draw-pile" id="draw-card" type="button" aria-label="Draw a card" disabled><span></span><b>DRAW</b></button>
-              <div class="pile-caption"><strong id="draw-count">DRAW PILE</strong><small id="draw-hint"></small></div>
+              <div class="pile-caption"><strong id="draw-count">DRAW</strong><small id="draw-hint"></small></div>
               <button class="discard-pile" id="top-card" type="button" disabled aria-label="Top discard card"></button>
               <div class="turn-actions">
-                <button class="uno-button" id="call-uno" type="button" disabled>Call UNO!</button>
+                <button class="uno-button" id="call-uno" type="button" disabled hidden>Call UNO!</button>
                 <button class="quiet-button" id="take-penalty" type="button" hidden>Take penalty</button>
               </div>
             </div>
-            <p class="action-message" id="last-action" aria-live="polite"></p>
-            <div class="penalty-row"><p id="stack-status"></p></div>
+            <div class="table-status">
+              <p class="action-message" id="last-action" aria-live="polite"></p>
+              <div class="penalty-row"><p id="stack-status"></p></div>
+            </div>
           </div>
           <div class="my-seat panel">
-            <div class="my-seat-heading"><div><p class="eyebrow">YOUR HAND</p><h2 id="my-name">Player</h2></div><span class="card-count" id="my-card-count">0 cards</span></div>
+            <div class="my-seat-heading">
+              <div class="my-identity"><span class="player-avatar" id="my-avatar">Y</span><div><p class="eyebrow">YOUR HAND</p><h2 id="my-name">Player</h2></div></div>
+              <span class="card-count" id="my-card-count">0 cards</span>
+              <span class="uno-reminder" id="uno-reminder" hidden>Two cards left — call UNO before you play!</span>
+            </div>
             <div class="hand" id="my-hand"></div>
           </div>
         </div>
-        <section class="panel chat-panel">
-          <div class="section-heading"><div><p class="eyebrow">TABLE CHAT</p><h2>Talk to the players</h2></div></div>
+        <details class="panel chat-panel">
+          <summary><span><span class="eyebrow">TABLE CHAT</span><strong>Talk to the players</strong></span><span class="chat-toggle">Open chat</span></summary>
           <div class="chat-log" id="chat-log" aria-live="polite"></div>
           <form id="chat-form" class="chat-form"><input id="chat-input" maxlength="240" autocomplete="off" placeholder="Write a message"><button class="quiet-button" type="submit">Send</button></form>
+        </details>
+        <section class="panel result-panel" id="result-panel" hidden>
+          <span class="result-avatar" id="result-avatar">★</span>
+          <p class="eyebrow">GAME OVER</p><h2 id="result-title"></h2>
+          <p class="result-message" id="result-message">Congratulations!</p>
+          <ol class="final-standings" id="final-standings"></ol>
+          <div class="result-actions"><button class="primary-button" id="rematch" type="button">Play again</button><button class="quiet-button" id="back-to-lobby" type="button">Return to rooms</button></div>
         </section>
-        <section class="panel result-panel" id="result-panel" hidden><p class="eyebrow">GAME OVER</p><h2 id="result-title"></h2><div class="result-actions"><button class="primary-button" id="rematch" type="button">Play again</button><button class="quiet-button" id="back-to-lobby" type="button">Back to rooms</button></div></section>
       </section>
     </section>
   </main>
